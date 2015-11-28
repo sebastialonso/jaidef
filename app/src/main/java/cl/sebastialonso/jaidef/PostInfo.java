@@ -8,11 +8,13 @@ class Post {
     String description;
     String imageUrl;
     String type;
+    double id;
 
-    Post(String _title, String _description, String _imageUrl, String _type){
+    Post(String _title, String _description, String _imageUrl, String _type, double _id){
         this.title = _title;
         this.description = _description;
         this.imageUrl = _imageUrl;
         this.type = _type;
+        this.id = _id;
     }
 }

@@ -2,7 +2,6 @@ package cl.sebastialonso.jaidef;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,8 +11,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -29,6 +26,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,6 +36,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
     private static final String TAG = "MyActivity";
     private List<Post> mPostList;
     private Context mContext;
+    private DefaultHashMap<Double, Boolean> mAlreadyMarked = new DefaultHashMap<>(false);
     private static final int VIEW_TYPE_FOOTER  = 0;
     private static final int VIEW_TYPE_CELL = 1;
     private int currentPage = 2;
@@ -45,10 +44,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
     public PostAdapter(List<Post> posts,Context context) {
         this.mPostList = posts;
         this.mContext = context;
-    }
-
-    public void setmPostList(List<Post> mPostList) {
-        this.mPostList = mPostList;
+        markPostsAsUnique();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -155,7 +151,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
                         //Feed the posts to mPostList
                         if (pageNumber == 0){
                             prependResponsePosts(response);
-                        } else hereTakePost(response);
+                        } else hereTakePosts(response);
                         loading.dismiss();
                     }
                 },
@@ -170,25 +166,21 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
         queue.add(stringRequest);
     };
 
-    public void hereTakePost(String response){
+    public void hereTakePosts(String response){
         Document doc = Jsoup.parse(response);
         Element content = doc.select("div#poto > div#content").first();
         Elements rawPosts = content.getElementsByClass("post");
 
         for (Element currentPost: rawPosts ) {
             if (!currentPost.getElementsByClass("img-wrap").isEmpty()) {
-                Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image");
-                mPostList.add(newPost);
-                notifyDataSetChanged();
-            } /*else if (!currentPost.getElementsByClass("media").isEmpty()) {
-                                Log.d(TAG, "El elemento es un video con URL " + currentPost.getElementsByClass("media").select("iframe").first().absUrl("src"));
-                                Post newPost = new Post("Video", "descripcion de video", currentPost.getElementsByClass("media").select("iframe").first().absUrl("src"), "video");
-                                mPosts.add(newPost);
-                            }*/
-            else {
-                Log.d(TAG, "" + currentPost.nextElementSibling().toString());
+                double postId = Double.parseDouble(currentPost.child(0).absUrl("href").split("/")[4]);
+                if (!mAlreadyMarked.get(postId)){
+                    Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image", postId);
+                    mPostList.add(newPost);
+                }
             }
         }
+        notifyDataSetChanged();
     }
 
     public void prependResponsePosts(String response){
@@ -199,14 +191,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
 
         for (Element currentPost: rawPosts ) {
             if (!currentPost.getElementsByClass("img-wrap").isEmpty()) {
-                Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image");
-                latestPosts.add(newPost);
-                notifyDataSetChanged();
-            } else {
-                Log.d(TAG, "" + currentPost.nextElementSibling().toString());
+                double postId = Double.parseDouble(currentPost.child(0).absUrl("href").split("/")[4]);
+                if (!mAlreadyMarked.get(postId)) {
+                    Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image", 1);
+                    latestPosts.add(newPost);
+                }
             }
         }
         mPostList.addAll(0,latestPosts);
         notifyDataSetChanged();
+    }
+
+    public void markPostsAsUnique(){
+        for (Post post: mPostList) {
+            mAlreadyMarked.put(post.id, true);
+        }
     }
 }

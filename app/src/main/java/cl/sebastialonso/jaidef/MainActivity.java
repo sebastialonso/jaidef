@@ -64,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
         //RecyclerView things
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        //Adapter is empty
-        //mPostAdapter = new PostAdapter(mPosts, mContext);
-        //mRecyclerView.setAdapter(mPostAdapter);
 
         //Pull-to-refresh
         mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
@@ -173,7 +170,9 @@ public class MainActivity extends AppCompatActivity {
                .media > .html_photoset > iframe src=URL con mas fotos -> Photoset
             */
             if (!currentPost.getElementsByClass("img-wrap").isEmpty()) {
-                Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image");
+                Double postId = Double.parseDouble(currentPost.child(0).absUrl("href").split("/")[4]);
+                //No se revisa el hashmap porque es la primera vez que ingresasn post al Adapter
+                Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image", postId);
                 resultPosts.add(newPost);
             }
             else {
