@@ -28,6 +28,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,6 +45,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
     public PostAdapter(List<Post> posts,Context context) {
         this.mPostList = posts;
         this.mContext = context;
+    }
+
+    public void setmPostList(List<Post> mPostList) {
+        this.mPostList = mPostList;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -129,13 +134,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
         return (position == mPostList.size()) ? VIEW_TYPE_FOOTER : VIEW_TYPE_CELL;
     }
 
-    public void fetchNextPage(int pageNumber){
+    public void fetchNextPage(final int pageNumber){
         final ProgressDialog loading = new ProgressDialog(mContext);
+        String url;
         loading.setIndeterminate(true);
         loading.setTitle("Trayendo más cáncer...");
         loading.setMessage("Esperate un poco, por favor");
         loading.show();
-        String url = "http://gg.jaidefinichon.com/page/" + String.valueOf(pageNumber);
+        if (pageNumber == 0){
+            url = "http://gg.jaidefinichon.com";
+        } else {
+            url ="http://gg.jaidefinichon.com/page/" + String.valueOf(pageNumber);
+        }
         RequestQueue queue = Volley.newRequestQueue(mContext);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -143,8 +153,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
                     @Override
                     public void onResponse(String response) {
                         //Feed the posts to mPostList
+                        if (pageNumber == 0){
+                            prependResponsePosts(response);
+                        } else hereTakePost(response);
                         loading.dismiss();
-                        hereTakePost(response);
                     }
                 },
                 new Response.ErrorListener(){
@@ -177,5 +189,24 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
                 Log.d(TAG, "" + currentPost.nextElementSibling().toString());
             }
         }
+    }
+
+    public void prependResponsePosts(String response){
+        Document doc = Jsoup.parse(response);
+        Element content = doc.select("div#poto > div#content").first();
+        Elements rawPosts = content.getElementsByClass("post");
+        List<Post> latestPosts = new ArrayList<>();
+
+        for (Element currentPost: rawPosts ) {
+            if (!currentPost.getElementsByClass("img-wrap").isEmpty()) {
+                Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image");
+                latestPosts.add(newPost);
+                notifyDataSetChanged();
+            } else {
+                Log.d(TAG, "" + currentPost.nextElementSibling().toString());
+            }
+        }
+        mPostList.addAll(0,latestPosts);
+        notifyDataSetChanged();
     }
 }

@@ -1,8 +1,13 @@
 package cl.sebastialonso.jaidef;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -10,7 +15,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -33,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     //For dealing with the cards
     private Context mContext;
     private RecyclerView mRecyclerView;
+    private PostAdapter mPostAdapter;
+    private SwipeRefreshLayout mSwipeContainer;
     private static final String TAG = "MyActivity";
     private List<Post> mPosts;
     FontContainer mFonts = new FontContainer(this);
@@ -49,11 +59,26 @@ public class MainActivity extends AppCompatActivity {
         TextView toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
         toolbarTitle.setTypeface(mFonts.lightComfortaa());
 
-        //Set the context
+
         mContext = this;
+        //RecyclerView things
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        //Adapter is empty
+        //mPostAdapter = new PostAdapter(mPosts, mContext);
+        //mRecyclerView.setAdapter(mPostAdapter);
+
+        //Pull-to-refresh
+        mSwipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        mSwipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                //Esta funcionalidad requiere que los posts sean únicos para que funcione bien
+                ((PostAdapter)mRecyclerView.getAdapter()).fetchNextPage(0);
+            }
+        });
         mPosts = new ArrayList<>();
+
         //First load of posts
         populateWithPosts();
     }
@@ -67,6 +92,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        menu.getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                final Dialog dialog = new Dialog(mContext);
+                dialog.setContentView(R.layout.activity_about);
+
+                Button dialogButton = (Button) dialog.findViewById(R.id.close_dialog);
+                dialogButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
+                return true;
+            }
+        });
         return true;
     }
 
@@ -76,12 +118,6 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -107,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        hereTakePosts(response);
+                        mPosts = hereTakePosts(response);
                         setPostAdapter();
                         Snackbar.make(findViewById(android.R.id.content), "Post cargados", Snackbar.LENGTH_LONG).show();
                     }
@@ -124,16 +160,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void hereTakePosts(String response) {
+    public List<Post> hereTakePosts(String response) {
         Document doc = Jsoup.parse(response);
         Element content = doc.select("div#poto > div#content").first();
         Elements posts = content.getElementsByClass("post");
+        List<Post> resultPosts = new ArrayList<>();
 
         for (Element currentPost : posts) {
-            //Log.d(TAG, "post actual");
-            //Log.d(TAG, currentPost.toString());
-            //Log.d(TAG, "buscando elemento img-wrap. Es vacio?" + currentPost.getElementsByClass("img-wrap").isEmpty());
-            //Log.d(TAG, "buscando elemento media. Es vacio?" + currentPost.getElementsByClass("media").isEmpty());
             //Hasta el momento existen 4 casos distintos
             /*
                .img-wrap > .media -> imagen JPEG o PNG o GIF
@@ -141,16 +174,13 @@ public class MainActivity extends AppCompatActivity {
             */
             if (!currentPost.getElementsByClass("img-wrap").isEmpty()) {
                 Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image");
-                mPosts.add(newPost);
-            } /*else if (!currentPost.getElementsByClass("media").isEmpty()) {
-                                Log.d(TAG, "El elemento es un video con URL " + currentPost.getElementsByClass("media").select("iframe").first().absUrl("src"));
-                                Post newPost = new Post("Video", "descripcion de video", currentPost.getElementsByClass("media").select("iframe").first().absUrl("src"), "video");
-                                mPosts.add(newPost);
-                            }*/
+                resultPosts.add(newPost);
+            }
             else {
                 Log.d(TAG, "" + currentPost.nextElementSibling().toString());
             }
         }
+        return resultPosts;
     }
 
 }
