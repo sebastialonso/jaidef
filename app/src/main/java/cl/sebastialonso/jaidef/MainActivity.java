@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
             public void onRefresh() {
                 //Esta funcionalidad requiere que los posts sean únicos para que funcione bien
                 ((PostAdapter)mRecyclerView.getAdapter()).fetchNextPage(0);
+                mSwipeContainer.setRefreshing(false);
             }
         });
         mPosts = new ArrayList<>();
@@ -133,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
     private void populateWithPosts() {
         //Llamar con Vollet a gg.jaidefinichon.com
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://gg.jaidefinichon.com";
+        String url = getString(R.string.url_base);
 
         //Request a string response from the provided URL
         StringRequest stringRequest =  new StringRequest(Request.Method.GET, url,
@@ -142,13 +143,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         mPosts = hereTakePosts(response);
                         setPostAdapter();
-                        Snackbar.make(findViewById(android.R.id.content), "Post cargados", Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(findViewById(android.R.id.content), getString(R.string.after_loading_snackbar_success), Snackbar.LENGTH_LONG).show();
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        Snackbar.make(findViewById(android.R.id.content), "Ocurrió un error. " + error.getMessage(), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(findViewById(android.R.id.content), getString(R.string.after_loading_snackbar_error) + error.getMessage(), Snackbar.LENGTH_LONG).show();
                     }
                 });
 

@@ -134,13 +134,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
         final ProgressDialog loading = new ProgressDialog(mContext);
         String url;
         loading.setIndeterminate(true);
-        loading.setTitle("Trayendo más cáncer...");
-        loading.setMessage("Esperate un poco, por favor");
+        loading.setTitle(mContext.getString(R.string.loading_dialog_title));
+        loading.setMessage(mContext.getString(R.string.loading_dialog_message));
         loading.show();
         if (pageNumber == 0){
-            url = "http://gg.jaidefinichon.com";
+            url = mContext.getString(R.string.url_base);
         } else {
-            url ="http://gg.jaidefinichon.com/page/" + String.valueOf(pageNumber);
+            url = mContext.getString(R.string.url_base_paged)+ String.valueOf(pageNumber);
         }
         RequestQueue queue = Volley.newRequestQueue(mContext);
 
@@ -175,7 +175,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
             if (!currentPost.getElementsByClass("img-wrap").isEmpty()) {
                 double postId = Double.parseDouble(currentPost.child(0).absUrl("href").split("/")[4]);
                 if (!mAlreadyMarked.get(postId)){
-                    Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image", postId);
+                    Post newPost = new Post(mContext.getString(R.string.new_post_title_placeholder), mContext.getString(R.string.new_post_description_placeholder), currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image", postId);
                     mPostList.add(newPost);
                 }
             }
@@ -193,7 +193,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
             if (!currentPost.getElementsByClass("img-wrap").isEmpty()) {
                 double postId = Double.parseDouble(currentPost.child(0).absUrl("href").split("/")[4]);
                 if (!mAlreadyMarked.get(postId)) {
-                    Post newPost = new Post("Titulo", "descripcion", currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image", 1);
+                    Post newPost = new Post(mContext.getString(R.string.new_post_title_placeholder), mContext.getString(R.string.new_post_description_placeholder), currentPost.getElementsByClass("media").select("img").first().absUrl("src"), "image", 1);
                     latestPosts.add(newPost);
                 }
             }

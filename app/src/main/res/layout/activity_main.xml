@@ -45,7 +45,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/recycler_view"
                 android:layout_marginTop="48dp"
-                android:paddingTop="60dp" />
+                android:paddingTop="55dp" />
 
         </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>

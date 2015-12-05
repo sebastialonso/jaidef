@@ -3,4 +3,12 @@
     <string name="action_settings">Settings</string>
     <string name="toolbar_title">jaidef</string>
     <string name="repo_link">Source en <a href="http://www.github.com/sebastialonso/jaidef">Github</a></string>
+    <string name="url_base">http://gg.jaidefinichon.com</string>
+    <string name="url_base_paged">http://gg.jaidefinichon.com/page/</string>
+    <string name="loading_dialog_title">Trayendo más cáncer...</string>
+    <string name="loading_dialog_message">Esperate un poco, por favor</string>
+    <string name="after_loading_snackbar_success">Post cargados</string>
+    <string name="after_loading_snackbar_error">Ocurrió un error. </string>
+    <string name="new_post_title_placeholder">Titulo</string>
+    <string name="new_post_description_placeholder">Descripcion</string>
 </resources>
