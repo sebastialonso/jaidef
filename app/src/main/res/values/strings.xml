@@ -11,4 +11,5 @@
     <string name="after_loading_snackbar_error">Ocurrió un error. </string>
     <string name="new_post_title_placeholder">Titulo</string>
     <string name="new_post_description_placeholder">Descripcion</string>
+    <string name="github_repo_link">https://github.com/sebastialonso/jaidef</string>
 </resources>

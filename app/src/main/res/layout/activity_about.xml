@@ -28,10 +28,10 @@
         android:layout_height="wrap_content"
         android:text="@string/repo_link"
         android:autoLink="web"
-        android:id="@+id/textView4"
+        android:id="@+id/source_link"
         android:layout_below="@+id/textView3"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp" />
+        android:layout_marginTop="28dp" />
 
 
     <android.support.v7.widget.AppCompatButton
@@ -41,9 +41,9 @@
         android:id="@+id/close_dialog"
         android:padding="5dp"
         style="?android:attr/borderlessButtonStyle"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="28dp"
         android:gravity="center"
-        android:layout_below="@+id/textView4"
+        android:layout_below="@+id/source_link"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

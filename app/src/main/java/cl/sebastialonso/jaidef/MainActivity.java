@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -31,6 +32,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,10 +99,19 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setContentView(R.layout.activity_about);
 
                 Button dialogButton = (Button) dialog.findViewById(R.id.close_dialog);
+                TextView sourceTextView = (TextView) dialog.findViewById(R.id.source_link);
                 dialogButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         dialog.dismiss();
+                    }
+                });
+                sourceTextView.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v){
+                        Intent goToUrl = new Intent(Intent.ACTION_VIEW);
+                        goToUrl.setData(Uri.parse(getString(R.string.github_repo_link)));
+                        startActivity(goToUrl);
                     }
                 });
                 dialog.show();
